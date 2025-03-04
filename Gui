@@ -468,14 +468,6 @@ function TbiGuiWindow.CreateWindow(GuiName)
 	return win
 end
 
-local TbiGui = TbiGuiWindow.CreateWindow("TbiGui")
-local RightTab = TbiGui:CreateTab(UDim2.new(0.53,0,0.1,0), Enum.HorizontalAlignment.Center, Enum.VerticalAlignment.Center, false)
-local LeftTab = TbiGui:CreateTab(UDim2.new(0.059,0,0.1,0), Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center, true)
-local NewSection, chartFrame, BucksPerMinuteLabel, TotalBucks, EarnedBucks = TbiGui:CreateSection(RightTab, "coins", "Bucks")
-local NewSection2, chartFrame2, PotionsPerMinuteLabel2, TotalPotions2, EarnedPotions2 = TbiGui:CreateSection(RightTab, "cup-soda", "Potions")
-local NewDisplaySection = TbiGui:CreateDisplaySection(LeftTab)
-local NewDisplay = TbiGui:CreateDisplay(NewDisplaySection, "party-popper", "Beach_Party", 0)
-
 
 local function updateCoins()
 	local currentCoins = ClientData.get_data()[LocalPlayer.Name].money
