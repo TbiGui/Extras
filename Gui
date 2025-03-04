@@ -585,7 +585,7 @@ function TbiGuiWindow.trackCoins(TotalBucks, EarnedBucks, BucksPerMinuteLabel, c
 	task.spawn(function()
 		while true do
 			wait(timeInterval)  
-			updateCoins()
+			updateCoins(TotalBucks, EarnedBucks, BucksPerMinuteLabel, chartFrame)
 			local coinsPerMinute = calculateCoinsPerMinute()
 			BucksPerMinuteLabel.Text = "Bucks per minute: " .. tostring(coinsPerMinute)
 		end
