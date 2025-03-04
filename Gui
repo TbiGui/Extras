@@ -517,18 +517,16 @@ end
 local function updatePotions(chartFrame2, PotionsPerHourLabel, TotalPotion2, EarnedPotions)
 	local currentPotions = GetPlayerPotionAmount()
 	TotalPotion2.Text = currentPotions
-	local potionInInterval = currentPotions - previousPotions  -- Berechne die Differenz der Coins
+	local potionInInterval = currentPotions - previousPotions
 	if currentPotions > previousPotions then
 		EarnedOldPotions = EarnedOldPotions + (currentPotions - previousPotions)
 	end
 	
-	EarnedPotions.Text = "(+".. EarnedOldBucks ..")"
+	EarnedPotions.Text = "(+".. EarnedOldPotions ..")"
 
-	-- Füge die Veränderung zu den Intervallen und der Minute hinzu
 	table.insert(intervalData2, potionInInterval)
 	table.insert(hourData, potionInInterval)
 
-	-- Entferne die ältesten Daten, wenn mehr als 60 Einträge vorhanden sind (entspricht einer Minute)
 	if #hourData > 3600 then
 		table.remove(hourData, 1)
 	end
@@ -536,12 +534,11 @@ local function updatePotions(chartFrame2, PotionsPerHourLabel, TotalPotion2, Ear
 	previousPotions = currentPotions
 
 	if potionInInterval == 0 then
-		return  -- Nur aktualisieren, wenn sich die Coins geändert haben
+		return
 	end
 
 	rescaleBars()
 
-	-- Aktualisiere die Anzeige der "Bucks per minute"
 	local PotionsPerHour = calculatePotionsPerHour()
 	PotionsPerHourLabel.Text = "Potions per hour: " .. tostring(PotionsPerHour)
 
@@ -551,14 +548,13 @@ local function updatePotions(chartFrame2, PotionsPerHourLabel, TotalPotion2, Ear
 		oldBar[2]:Destroy()
 	end
 
-	-- Neuen Balken erstellen
 	local bar = Instance.new("Frame")
-	bar.Size = UDim2.new(barWidthScale, 0, 0, 0)  -- Anfangsgröße (0 Höhe)
+	bar.Size = UDim2.new(barWidthScale, 0, 0, 0)
 	bar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	bar.BorderSizePixel = 0
 	local newPositionX = offsetX + #bars2 * (barWidthScale + spacingScale)
 	local centerY = 0.5
-	bar.Position = UDim2.new(newPositionX, 0, centerY, 0)  -- Startposition
+	bar.Position = UDim2.new(newPositionX, 0, centerY, 0)
 	bar.Parent = chartFrame2
 	
 	local newCorner = Instance.new("UICorner")
@@ -578,28 +574,25 @@ local function updatePotions(chartFrame2, PotionsPerHourLabel, TotalPotion2, Ear
 		ColorSequenceKeypoint.new(1, Color3.fromRGB(167, 0, 0)),
 	}
 
-	-- Berechne die endgültige Höhe und Position des Balkens
 	local barHeightScale = math.abs(potionInInterval) / maxPotionSeen * 0.4
 	local targetPosition = potionInInterval >= 0 and UDim2.new(newPositionX, 0, centerY - barHeightScale, 0) or UDim2.new(newPositionX, 0, centerY, 0)
 	local targetSize = UDim2.new(barWidthScale, 0, barHeightScale, 0)
 
-	-- Animation (Tween) der Größe und Position
 	local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	game:GetService("TweenService"):Create(bar, tweenInfo, {Size = targetSize}):Play()
 	game:GetService("TweenService"):Create(bar, tweenInfo, {Position = targetPosition}):Play()
 
 	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(barWidthScale, 0, 0.04, 0)  -- Kleinere Label-Größe
+	label.Size = UDim2.new(barWidthScale, 0, 0.04, 0)
 	label.Text = tostring(potionInInterval)  
 	label.TextColor3 = Color3.fromRGB(255, 255, 255)
 	label.BackgroundTransparency = 1
-	label.TextSize = 8  -- Kleinere Schriftgröße
+	label.TextSize = 8
 	label.Position = UDim2.new(newPositionX, 0, centerY - 0.06, 0)
 	label.Parent = chartFrame2
 
 	table.insert(bars2, {bar, label, barHeightScale, potionInInterval})
 
-	-- Bestehende Balken aktualisieren
 	for i, barData in ipairs(bars2) do
 		local bar = barData[1]
 		local label = barData[2]
@@ -629,18 +622,18 @@ end
 local function updateCoins(chartFrame, BucksPerMinuteLabel, TotalBucks, EarnedBucks)
 	local currentCoins = ClientData.get_data()[LocalPlayer.Name].money
 	TotalBucks.Text = currentCoins
-	local coinsInInterval = currentCoins - previousCoins  -- Berechne die Differenz der Coins
+	local coinsInInterval = currentCoins - previousCoins
 	if currentCoins > previousCoins then
 		EarnedOldBucks = EarnedOldBucks + (currentCoins - previousCoins)
 	end
 
 	EarnedBucks.Text = "(+".. EarnedOldBucks ..")"
 
-	-- Füge die Veränderung zu den Intervallen und der Minute hinzu
+
 	table.insert(intervalData, coinsInInterval)
 	table.insert(minuteData, coinsInInterval)
 
-	-- Entferne die ältesten Daten, wenn mehr als 60 Einträge vorhanden sind (entspricht einer Minute)
+	
 	if #minuteData > 60 then
 		table.remove(minuteData, 1)
 	end
@@ -648,12 +641,11 @@ local function updateCoins(chartFrame, BucksPerMinuteLabel, TotalBucks, EarnedBu
 	previousCoins = currentCoins
 
 	if coinsInInterval == 0 then
-		return  -- Nur aktualisieren, wenn sich die Coins geändert haben
+		return
 	end
 
 	rescaleBars()
 
-	-- Aktualisiere die Anzeige der "Bucks per minute"
 	local coinsPerMinute = calculateCoinsPerMinute()
 	BucksPerMinuteLabel.Text = "Bucks per minute: " .. tostring(coinsPerMinute)
 
@@ -663,14 +655,14 @@ local function updateCoins(chartFrame, BucksPerMinuteLabel, TotalBucks, EarnedBu
 		oldBar[2]:Destroy()
 	end
 
-	-- Neuen Balken erstellen
+
 	local bar = Instance.new("Frame")
-	bar.Size = UDim2.new(barWidthScale, 0, 0, 0)  -- Anfangsgröße (0 Höhe)
+	bar.Size = UDim2.new(barWidthScale, 0, 0, 0)
 	bar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	bar.BorderSizePixel = 0
 	local newPositionX = offsetX + #bars * (barWidthScale + spacingScale)
 	local centerY = 0.5
-	bar.Position = UDim2.new(newPositionX, 0, centerY, 0)  -- Startposition
+	bar.Position = UDim2.new(newPositionX, 0, centerY, 0) 
 	bar.Parent = chartFrame
 
 	local newCorner = Instance.new("UICorner")
@@ -690,28 +682,25 @@ local function updateCoins(chartFrame, BucksPerMinuteLabel, TotalBucks, EarnedBu
 		ColorSequenceKeypoint.new(1, Color3.fromRGB(167, 0, 0)),
 	}
 
-	-- Berechne die endgültige Höhe und Position des Balkens
 	local barHeightScale = math.abs(coinsInInterval) / maxCoinsSeen * 0.4
 	local targetPosition = coinsInInterval >= 0 and UDim2.new(newPositionX, 0, centerY - barHeightScale, 0) or UDim2.new(newPositionX, 0, centerY, 0)
 	local targetSize = UDim2.new(barWidthScale, 0, barHeightScale, 0)
 
-	-- Animation (Tween) der Größe und Position
 	local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	game:GetService("TweenService"):Create(bar, tweenInfo, {Size = targetSize}):Play()
 	game:GetService("TweenService"):Create(bar, tweenInfo, {Position = targetPosition}):Play()
 
 	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(barWidthScale, 0, 0.04, 0)  -- Kleinere Label-Größe
+	label.Size = UDim2.new(barWidthScale, 0, 0.04, 0)
 	label.Text = tostring(coinsInInterval)  
 	label.TextColor3 = Color3.fromRGB(255, 255, 255)
 	label.BackgroundTransparency = 1
-	label.TextSize = 8  -- Kleinere Schriftgröße
+	label.TextSize = 8 
 	label.Position = UDim2.new(newPositionX, 0, centerY - 0.06, 0)
 	label.Parent = chartFrame
 
 	table.insert(bars, {bar, label, barHeightScale, coinsInInterval})
 
-	-- Bestehende Balken aktualisieren
 	for i, barData in ipairs(bars) do
 		local bar = barData[1]
 		local label = barData[2]
