@@ -581,7 +581,7 @@ local function updateCoins(TotalBucks, EarnedBucks, BucksPerMinuteLabel, chartFr
 	end
 end
 
-TbiGuiWindow.trackCoins(function(TotalBucks, EarnedBucks, BucksPerMinuteLabel, chartFrame)
+function TbiGuiWindow.trackCoins(TotalBucks, EarnedBucks, BucksPerMinuteLabel, chartFrame)
 	task.spawn(function()
 		while true do
 			wait(timeInterval)  
@@ -590,6 +590,6 @@ TbiGuiWindow.trackCoins(function(TotalBucks, EarnedBucks, BucksPerMinuteLabel, c
 			BucksPerMinuteLabel.Text = "Bucks per minute: " .. tostring(coinsPerMinute)
 		end
 	end)
-end)
+end
 
 return TbiGuiWindow
