@@ -469,7 +469,7 @@ function TbiGuiWindow.CreateWindow(GuiName)
 end
 
 
-local function updateCoins()
+local function updateCoins(TotalBucks, EarnedBucks, BucksPerMinuteLabel, chartFrame)
 	local currentCoins = ClientData.get_data()[LocalPlayer.Name].money
 	TotalBucks.Text = currentCoins
 	local coinsInInterval = currentCoins - previousCoins  -- Berechne die Differenz der Coins
@@ -581,7 +581,7 @@ local function updateCoins()
 	end
 end
 
-local function trackCoins()
+TbiGuiWindow.trackCoins(function(TotalBucks, EarnedBucks, BucksPerMinuteLabel, chartFrame)
 	task.spawn(function()
 		while true do
 			wait(timeInterval)  
@@ -590,8 +590,6 @@ local function trackCoins()
 			BucksPerMinuteLabel.Text = "Bucks per minute: " .. tostring(coinsPerMinute)
 		end
 	end)
-end
-
-trackCoins()
+end)
 
 return TbiGuiWindow
