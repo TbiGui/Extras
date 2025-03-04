@@ -165,7 +165,7 @@ function TbiGuiWindow:CreateDisplay(Section, Icon, Title, Amount)
 	Gardient3.Rotation = 90
 	NewTextLabel2.LayoutOrder = 3
 	
-	return NewDisplay, NewTextLabel2
+	return {["Section"] = NewDisplay, ["Label"] = NewTextLabel2}
 end
 
 function TbiGuiWindow:CreateDisplaySection(Section)
