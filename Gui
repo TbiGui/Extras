@@ -6,22 +6,53 @@ local spacingScale = 0.03
 local timeInterval = 1  
 local maxBars = math.floor(1 / (barWidthScale + spacingScale))  
 local bars = {}  
+local bars2 = {}  
 local intervalData = {}  
+local intervalData2 = {}  
 local minuteData = {}  
+local hourData = {}  
 local maxCoinsSeen = 25
+local maxPotionSeen = 5
 local previousCoins = ClientData.get_data()[LocalPlayer.Name].money
 local EarnedOldBucks = 0
+local EarnedOldPotions = 0
 local offsetX = 0.035
 
 local Icons = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/refs/heads/main/icons.lua'))()
 
+local function GetPlayerPotionAmount()
+	local PlayerInv = ClientData.get_data()[LocalPlayer.Name].inventory
+	local PlayerInventoryFood = PlayerInv.food
+	local NewPlayerAgePotion = 0
+
+	for i,v in pairs(PlayerInventoryFood) do
+		if v.kind == "pet_age_potion" then
+			NewPlayerAgePotion = NewPlayerAgePotion + 1
+		end
+	end
+
+	return NewPlayerAgePotion or 0
+end
+
+local previousPotions = GetPlayerPotionAmount()
+
 local function calculateCoinsPerMinute()
 	local totalCoins = 0
-	-- Berechne die Summe der Coins der letzten Minute
+	
 	for _, coins in ipairs(minuteData) do
 		totalCoins = totalCoins + coins
 	end
 	return totalCoins
+end
+
+local function calculatePotionsPerHour()
+	local totalPotions = 0
+	
+	for _, potions in ipairs(hourData) do
+		totalPotions = totalPotions + potions
+	end
+	
+	return totalPotions
 end
 
 local function rescaleBars()
@@ -35,6 +66,21 @@ local function rescaleBars()
 	for _, barData in ipairs(bars) do
 		if math.abs(barData[4]) > maxCoinsSeen then
 			maxCoinsSeen = math.abs(barData[4])
+		end
+	end
+end
+
+local function rescaleBars2()
+	maxPotionSeen = 5
+	for _, data in ipairs(intervalData2) do
+		if math.abs(data) > maxPotionSeen then
+			maxPotionSeen = math.abs(data)
+		end
+	end
+
+	for _, barData in ipairs(bars2) do
+		if math.abs(barData[4]) > maxPotionSeen then
+			maxPotionSeen = math.abs(barData[4])
 		end
 	end
 end
@@ -468,15 +514,126 @@ function TbiGuiWindow.CreateWindow(GuiName)
 	return win
 end
 
+local function updatePotions(chartFrame2, PotionsPerHourLabel, TotalPotion2, EarnedPotions)
+	local currentPotions = GetPlayerPotionAmount()
+	TotalPotion2.Text = currentPotions
+	local potionInInterval = currentPotions - previousPotions  -- Berechne die Differenz der Coins
+	if currentPotions > previousPotions then
+		EarnedOldPotions = EarnedOldPotions + (currentPotions - previousPotions)
+	end
+	
+	EarnedPotions.Text = "(+".. EarnedOldBucks ..")"
 
-local function updateCoins(TotalBucks, EarnedBucks, BucksPerMinuteLabel, chartFrame)
+	-- Füge die Veränderung zu den Intervallen und der Minute hinzu
+	table.insert(intervalData2, potionInInterval)
+	table.insert(hourData, potionInInterval)
+
+	-- Entferne die ältesten Daten, wenn mehr als 60 Einträge vorhanden sind (entspricht einer Minute)
+	if #hourData > 3600 then
+		table.remove(hourData, 1)
+	end
+
+	previousPotions = currentPotions
+
+	if potionInInterval == 0 then
+		return  -- Nur aktualisieren, wenn sich die Coins geändert haben
+	end
+
+	rescaleBars()
+
+	-- Aktualisiere die Anzeige der "Bucks per minute"
+	local PotionsPerHour = calculatePotionsPerHour()
+	PotionsPerHourLabel.Text = "Potions per hour: " .. tostring(PotionsPerHour)
+
+	if #bars2 >= maxBars then
+		local oldBar = table.remove(bars2, 1)
+		oldBar[1]:Destroy()
+		oldBar[2]:Destroy()
+	end
+
+	-- Neuen Balken erstellen
+	local bar = Instance.new("Frame")
+	bar.Size = UDim2.new(barWidthScale, 0, 0, 0)  -- Anfangsgröße (0 Höhe)
+	bar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	bar.BorderSizePixel = 0
+	local newPositionX = offsetX + #bars2 * (barWidthScale + spacingScale)
+	local centerY = 0.5
+	bar.Position = UDim2.new(newPositionX, 0, centerY, 0)  -- Startposition
+	bar.Parent = chartFrame2
+	
+	local newCorner = Instance.new("UICorner")
+	newCorner.Parent = bar
+	newCorner.CornerRadius = UDim.new(0.45,0)
+
+	local newGardient = Instance.new("UIGradient")
+	newGardient.Parent = bar
+	newGardient.Rotation = potionInInterval >= 0 and 90 or -90
+	newGardient.Color = potionInInterval >= 0 and ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(85, 255, 0)),
+		ColorSequenceKeypoint.new(0.55, Color3.fromRGB(85, 255, 0)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(62, 186, 0)),
+	} or ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+		ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(167, 0, 0)),
+	}
+
+	-- Berechne die endgültige Höhe und Position des Balkens
+	local barHeightScale = math.abs(potionInInterval) / maxPotionSeen * 0.4
+	local targetPosition = potionInInterval >= 0 and UDim2.new(newPositionX, 0, centerY - barHeightScale, 0) or UDim2.new(newPositionX, 0, centerY, 0)
+	local targetSize = UDim2.new(barWidthScale, 0, barHeightScale, 0)
+
+	-- Animation (Tween) der Größe und Position
+	local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	game:GetService("TweenService"):Create(bar, tweenInfo, {Size = targetSize}):Play()
+	game:GetService("TweenService"):Create(bar, tweenInfo, {Position = targetPosition}):Play()
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(barWidthScale, 0, 0.04, 0)  -- Kleinere Label-Größe
+	label.Text = tostring(potionInInterval)  
+	label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	label.BackgroundTransparency = 1
+	label.TextSize = 8  -- Kleinere Schriftgröße
+	label.Position = UDim2.new(newPositionX, 0, centerY - 0.06, 0)
+	label.Parent = chartFrame2
+
+	table.insert(bars2, {bar, label, barHeightScale, potionInInterval})
+
+	-- Bestehende Balken aktualisieren
+	for i, barData in ipairs(bars2) do
+		local bar = barData[1]
+		local label = barData[2]
+		local height = math.abs(barData[4]) / maxPotionSeen * 0.4  
+		local value = barData[4]
+		local newPositionX = offsetX + (i - 1) * (barWidthScale + spacingScale)
+		local centerY = 0.5  
+		local targetSize, targetPosition, labelPosition
+
+		if value >= 0 then
+			targetSize = UDim2.new(barWidthScale, 0, height, 0)
+			targetPosition = UDim2.new(newPositionX, 0, centerY - height, 0)  
+			labelPosition = UDim2.new(newPositionX, 0, centerY - height - 0.05, 0)
+		else
+			targetSize = UDim2.new(barWidthScale, 0, height, 0)
+			targetPosition = UDim2.new(newPositionX, 0, centerY, 0)  
+			labelPosition = UDim2.new(newPositionX, 0, centerY + height, 0)
+		end
+
+		local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		game:GetService("TweenService"):Create(bar, tweenInfo, {Size = targetSize}):Play()
+		game:GetService("TweenService"):Create(bar, tweenInfo, {Position = targetPosition}):Play()
+		game:GetService("TweenService"):Create(label, tweenInfo, {Position = labelPosition}):Play()
+	end
+end
+
+local function updateCoins(chartFrame, BucksPerMinuteLabel, TotalBucks, EarnedBucks)
 	local currentCoins = ClientData.get_data()[LocalPlayer.Name].money
 	TotalBucks.Text = currentCoins
 	local coinsInInterval = currentCoins - previousCoins  -- Berechne die Differenz der Coins
 	if currentCoins > previousCoins then
 		EarnedOldBucks = EarnedOldBucks + (currentCoins - previousCoins)
 	end
-	
+
 	EarnedBucks.Text = "(+".. EarnedOldBucks ..")"
 
 	-- Füge die Veränderung zu den Intervallen und der Minute hinzu
@@ -515,7 +672,7 @@ local function updateCoins(TotalBucks, EarnedBucks, BucksPerMinuteLabel, chartFr
 	local centerY = 0.5
 	bar.Position = UDim2.new(newPositionX, 0, centerY, 0)  -- Startposition
 	bar.Parent = chartFrame
-	
+
 	local newCorner = Instance.new("UICorner")
 	newCorner.Parent = bar
 	newCorner.CornerRadius = UDim.new(0.45,0)
@@ -581,13 +738,24 @@ local function updateCoins(TotalBucks, EarnedBucks, BucksPerMinuteLabel, chartFr
 	end
 end
 
-function TbiGuiWindow.trackCoins(TotalBucks, EarnedBucks, BucksPerMinuteLabel, chartFrame)
+function TbiGuiWindow.trackCoins(chartFrame, BucksPerMinuteLabel, TotalBucks, EarnedBucks)
 	task.spawn(function()
 		while true do
 			wait(timeInterval)  
-			updateCoins(TotalBucks, EarnedBucks, BucksPerMinuteLabel, chartFrame)
+			updateCoins(chartFrame, BucksPerMinuteLabel, TotalBucks, EarnedBucks)
 			local coinsPerMinute = calculateCoinsPerMinute()
 			BucksPerMinuteLabel.Text = "Bucks per minute: " .. tostring(coinsPerMinute)
+		end
+	end)
+end
+
+function TbiGuiWindow.trackPotions(chartFrame2,  PotionsPerHourLabel, TotalPotion2, EarnedPotions)
+	task.spawn(function()
+		while true do
+			wait(timeInterval)  
+			updatePotions(chartFrame2,  PotionsPerHourLabel, TotalPotion2, EarnedPotions)
+			local potionsPerHour = calculatePotionsPerHour()
+			PotionsPerHourLabel.Text = "Potions per hour: " .. tostring(potionsPerHour)
 		end
 	end)
 end
