@@ -1,1 +1,187 @@
---
+local AdoptMeConfigs = {}
+AdoptMeConfigs.__index = AdoptMeConfigs
+
+local LocalPlayer = game.Players.LocalPlayer
+
+local getiden = getthreadidentity or getidentity
+local setiden = setthreadidentity or setidentity
+
+ClientData = require(game:GetService("ReplicatedStorage").ClientModules.Core.ClientData)
+RouterClient = require(game:GetService("ReplicatedStorage").ClientModules.Core.RouterClient.RouterClient)
+
+function AdoptMeConfigs.GetPlayersInventory()
+	return ClientData.get_data()[LocalPlayer.Name].inventory
+end
+
+function AdoptMeConfigs.GetAilmentsManager()
+	return ClientData.get_server(LocalPlayer,"ailments_manager")
+end
+
+function AdoptMeConfigs.GetPetPetEntityManager()
+	return require(game:GetService("ReplicatedStorage").ClientModules.Game.PetEntities.PetEntityManager)
+end
+
+function AdoptMeConfigs.InventoryDB()
+	return require(game:GetService("ReplicatedStorage").ClientDB.Inventory.InventoryDB)
+end
+
+function AdoptMeConfigs.RunRouterClient(IsFire, RouterName, args)
+	local old = getiden()
+	setiden(2)
+	if IsFire then
+		if args then
+			RouterClient.get(RouterName):FireServer(unpack(args))
+		else
+			RouterClient.get(RouterName):FireServer()
+		end
+	else
+		if args then
+			RouterClient.get(RouterName):InvokeServer(unpack(args))	
+		else
+			RouterClient.get(RouterName):InvokeServer()	
+		end
+	end
+	setiden(old)
+end
+
+function AdoptMeConfigs.GetPlayersPetConfigs(PetUnique)
+	local PetConfigs = {
+		petKind = "",
+		petAge = ""
+	}
+	
+	for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
+		if i == PetUnique then
+			PetConfigs.petKind = v.kind or ""
+			PetConfigs.petAge = v.properties.age or 1
+			break
+		end
+	end
+	
+	return PetConfigs
+end
+
+function AdoptMeConfigs.GetPetConfigs(PetKind)
+	local PetConfigs = {
+		isEgg = false,
+	}
+	
+	for i,v in pairs(AdoptMeConfigs.InventoryDB().pets) do
+		if i == PetKind then
+			PetConfigs.isEgg = v.is_egg or false
+			break
+		end
+	end
+	
+	return PetConfigs
+end
+
+function AdoptMeConfigs.GetPlayersEquippedPets()
+	return ClientData.get_data()[game.Players.LocalPlayer.Name].equip_manager.pets
+end
+
+function AdoptMeConfigs.GetCurrentPet(PetUnique)	
+	local CurrentPet = {}
+	
+	for _,v in pairs(AdoptMeConfigs.GetPetPetEntityManager().get_local_owned_pet_entities()) do
+		if v.unique_id == PetUnique then
+			CurrentPet = v
+			break
+		end
+	end
+	
+	return CurrentPet
+end
+
+function AdoptMeConfigs.GetAilments(PetUnique1, PetUnique2, DisabledAilments)
+	local Ailments = {
+		["FirstPet"] = {},
+		["SecondPet"] = {},
+		["Baby"] = {},	
+	}
+	
+	local AilmentsManager = AdoptMeConfigs.GetAilmentsManager()
+	local PetAilments = AilmentsManager.ailments
+	local BabyAilments = AilmentsManager.baby_ailments
+	
+	Ailments.Baby = BabyAilments or {}
+	
+	for i,v in pairs(PetAilments) do
+		if i == PetUnique1 then
+			for i2,v2 in pairs(v) do
+				if DisabledAilments and not table.find(DisabledAilments, v2.kind) then
+					Ailments.FirstPet[v2.kind] = {}
+				end
+			end
+			elseif i == PetUnique2 then
+			for i2,v2 in pairs(v) do
+				if DisabledAilments and not table.find(DisabledAilments, v2.kind) then
+					Ailments.SecondPet[v2.kind] = {}
+				end
+			end
+		end
+	end
+	
+	return Ailments
+end
+
+function AdoptMeConfigs.EquipPet(PetUnique)
+	local args = {
+		[1] = PetUnique,
+		[2] = {
+			["equip_as_last"] = false,
+			["use_sound_delay"] = true
+		}
+	}
+	AdoptMeConfigs.RunRouterClient(false, "ToolAPI/Equip", args)
+end
+
+function AdoptMeConfigs.UnequipPet(PetUnique)
+	local args = {
+		[1] = PetUnique,
+		[2] = {
+			["equip_as_last"] = false,
+			["use_sound_delay"] = true
+		}
+	}
+	AdoptMeConfigs.RunRouterClient(false, "ToolAPI/Unequip", args)
+end
+
+function AdoptMeConfigs.UnequipAllPets()
+	for _,v in pairs(AdoptMeConfigs.GetPlayersEquippedPets()) do
+		if v.unique then
+			AdoptMeConfigs.UnequipPet(v.unique)
+		end
+	end
+end
+
+function AdoptMeConfigs.GetSameKind(PetUnique, PetKind)
+	for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
+		if i == PetUnique then
+			continue
+		end
+		
+		if v.kind == PetKind then
+			return i
+		end
+	end
+end
+
+function AdoptMeConfigs.GetRandomKind(PetUnique)
+	for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
+		if i == PetUnique then
+			continue
+		end
+		
+		local PetConfigs = AdoptMeConfigs.GetPetConfigs(AdoptMeConfigs.GetPlayersPetConfigs(PetUnique).petKind)
+		local PetToSearch = AdoptMeConfigs.GetPetConfigs(v.kind)
+		
+		if PetConfigs.isEgg and PetToSearch.isEgg then
+			return i
+		elseif not PetConfigs.isEgg and not PetToSearch.isEgg then
+			return i
+		end
+	end
+end
+
+return AdoptMeConfigs
