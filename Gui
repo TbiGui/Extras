@@ -25,6 +25,10 @@ function AdoptMeConfigs.InventoryDB()
 	return require(game:GetService("ReplicatedStorage").ClientDB.Inventory.InventoryDB)
 end
 
+function AdoptMeConfigs.GetCertificate()
+	return ClientData.get("subscription_manager").equip_2x_pets.active
+end
+
 local Location
 for i, v in next, getgc() do
 	if type(v) == "function" and islclosure(v) and table.find(getconstants(v), "LocationAPI/SetLocation") then
