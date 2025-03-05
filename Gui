@@ -25,6 +25,71 @@ function AdoptMeConfigs.InventoryDB()
 	return require(game:GetService("ReplicatedStorage").ClientDB.Inventory.InventoryDB)
 end
 
+local Location
+for i, v in next, getgc() do
+	if type(v) == "function" and islclosure(v) and table.find(getconstants(v), "LocationAPI/SetLocation") then
+		Location = v
+		break
+	end
+end
+
+local function SetLocation(A, B, C)
+	local old = getiden()
+	setiden(2)
+	Location(A, B, C)
+	setiden(old)
+end
+
+local function GetInteriorModel()
+	return workspace.Interiors:FindFirstChildWhichIsA("Model")
+end
+
+local function Store()
+	local storeModel = GetInteriorModel()
+	return (storeModel and not storeModel.Name:find("MainMap") and not storeModel.Name:find("Neighborhood")) and storeModel.Name or false
+end
+
+local function GetHomeModel()
+	return workspace.HouseInteriors.blueprint:FindFirstChildWhichIsA("Model")
+end
+
+local function Home()
+	local homeModel = GetHomeModel()
+	return homeModel and homeModel.Name or false
+end
+
+local function MainMap()
+	local mapModel = GetInteriorModel()
+	return (mapModel and mapModel.Name:find("MainMap")) and mapModel.Name or false
+end
+
+local function Neighborhood()
+	local neighborhoodModel = GetInteriorModel()
+	return (neighborhoodModel and neighborhoodModel.Name:find("Neighborhood")) and neighborhoodModel.Name or false
+end
+
+local function TeleportAndWait(LocationName, Door, Params, Condition)
+	SetLocation(LocationName, Door, Params)
+	return true
+end
+
+function AdoptMeConfigs.GoToStore(Name)
+	if Store() == Name then return true end
+	return TeleportAndWait(Name, "MainDoor", {}, function() return Store() == Name end)
+end
+
+function AdoptMeConfigs.GoToMainMap()
+	return TeleportAndWait("MainMap", "Neighborhood/MainDoor", {}, MainMap)
+end
+
+function AdoptMeConfigs.GoToHome()
+	return TeleportAndWait("housing", "MainDoor", {["house_owner"] = LocalPlayer}, Home)
+end
+
+function AdoptMeConfigs.GoToNeighborhood()
+	return TeleportAndWait("Neighborhood", "MainDoor", {}, Neighborhood)
+end
+
 function AdoptMeConfigs.RunRouterClient(IsFire, RouterName, args)
 	local old = getiden()
 	setiden(2)
