@@ -199,6 +199,9 @@ function AdoptMeConfigs.GetAilments(PetUnique1, PetUnique2, DisabledAilments)
 	Ailments.Baby = BabyAilments or {}
 	
 	for i,v in pairs(PetAilments) do
+		if not PetUnique1 and not PetUnique2 then
+			break
+		end
 		if i == PetUnique1 then
 			for i2,v2 in pairs(v) do
 				if DisabledAilments and not table.find(DisabledAilments, v2.kind) then
@@ -247,18 +250,6 @@ function AdoptMeConfigs.UnequipAllPets()
 	end
 end
 
-function AdoptMeConfigs.GetSameKind(PetUnique, PetKind)
-	for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
-		if i == PetUnique then
-			continue
-		end
-		
-		if v.kind == PetKind then
-			return i
-		end
-	end
-end
-
 function AdoptMeConfigs.IsEggNotThere(EggUnique)
 	local IsEggThere = false
 	local Success, Err = pcall(function()
@@ -281,6 +272,18 @@ function AdoptMeConfigs.IsEggNotThere(EggUnique)
 			return false
 		else
 			return true
+		end
+	end
+end
+
+function AdoptMeConfigs.GetSameKind(PetUnique, PetKind)
+	for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
+		if i == PetUnique then
+			continue
+		end
+		
+		if v.kind == PetKind then
+			return i
 		end
 	end
 end
