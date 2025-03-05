@@ -9,6 +9,10 @@ local setiden = setthreadidentity or setidentity
 ClientData = require(game:GetService("ReplicatedStorage").ClientModules.Core.ClientData)
 RouterClient = require(game:GetService("ReplicatedStorage").ClientModules.Core.RouterClient.RouterClient)
 
+function AdoptMeConfigs.getLastSegment(path)
+	return string.match(path, ".*/(.*)")
+end
+
 function AdoptMeConfigs.GetPlayersInventory()
 	return ClientData.get_data()[LocalPlayer.Name].inventory
 end
@@ -248,6 +252,20 @@ function AdoptMeConfigs.UnequipAllPets()
 			AdoptMeConfigs.UnequipPet(v.unique)
 		end
 	end
+end
+
+function AdoptMeConfigs.GetFurniture(Furniture)
+		local HouseInteriorsNew = workspace:WaitForChild("HouseInteriors")
+		for i,v in pairs(HouseInteriorsNew:WaitForChild("furniture"):GetChildren()) do
+			task.wait()
+			for i2,v2 in pairs(v:GetChildren()) do
+				task.wait() 
+				if v2.Name == Furniture then
+					return AdoptMeConfigs.getLastSegment(v.Name)
+				end
+			end
+		end
+	return false
 end
 
 function AdoptMeConfigs.IsEggNotThere(EggUnique)
