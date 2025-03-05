@@ -182,6 +182,7 @@ function AdoptMeConfigs.GetCurrentPet(PetUnique)
 		for i,v in next, AdoptMeConfigs.GetPetPetEntityManager().get_local_owned_pet_entities() do
 			if string.find(v.unique_id, PetUnique, 1, true) then
 				CurrentPet = v
+				break
 			end
 		end
 	
