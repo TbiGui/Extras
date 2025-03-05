@@ -296,9 +296,9 @@ function AdoptMeConfigs.IsEggNotThere(EggUnique)
 	end
 end
 
-function AdoptMeConfigs.GetSameKind(PetUnique, PetKind)
+function AdoptMeConfigs.GetSameKind(PetUnique1, PetUnique2, PetKind)
 	for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
-		if i == PetUnique then
+		if i == PetUnique1 or i == PetUnique2 then
 			continue
 		end
 		
@@ -308,9 +308,9 @@ function AdoptMeConfigs.GetSameKind(PetUnique, PetKind)
 	end
 end
 
-function AdoptMeConfigs.GetRandomKind(PetUnique)
+function AdoptMeConfigs.GetRandomKind(PetUnique1, PetUnique2)
 	for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
-		if i == PetUnique then
+		if i == PetUnique1 or i == PetUnique2 then
 			continue
 		end
 		
