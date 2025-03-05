@@ -113,6 +113,29 @@ function AdoptMeConfigs.RunRouterClient(IsFire, RouterName, args)
 	setiden(old)
 end
 
+function AdoptMeConfigs.SetPlayerToParent()
+	local args = {
+		[1] = "Parents",
+		[2] = {
+			["dont_respawn"] = true,
+			["source_for_logging"] = "avatar_editor"
+		}
+	}
+
+	AdoptMeConfigs.RunRouterClient(false, "TeamAPI/ChooseTeam", args)
+end
+
+function AdoptMeConfigs.SetPlayerToBaby()
+	local args = {
+		[1] = "Babies",
+		[2] = {
+			["dont_respawn"] = true,
+			["source_for_logging"] = "avatar_editor"
+		}
+	}
+	AdoptMeConfigs.RunRouterClient(false, "TeamAPI/ChooseTeam", args)
+end
+
 function AdoptMeConfigs.GetPlayersPetConfigs(PetUnique)
 	local PetConfigs = {
 		petKind = "",
