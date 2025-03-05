@@ -233,6 +233,7 @@ function AdoptMeConfigs.EquipPet(PetUnique)
 		}
 	}
 	AdoptMeConfigs.RunRouterClient(false, "ToolAPI/Equip", args)
+	print(PetUnique .. " Equipped")
 end
 
 function AdoptMeConfigs.UnequipPet(PetUnique)
@@ -249,6 +250,7 @@ end
 function AdoptMeConfigs.UnequipAllPets()
 	for _,v in pairs(AdoptMeConfigs.GetPlayersEquippedPets()) do
 		if v.unique then
+			print(v.unique .. " unequipped")
 			AdoptMeConfigs.UnequipPet(v.unique)
 		end
 	end
