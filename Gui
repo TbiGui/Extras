@@ -259,6 +259,32 @@ function AdoptMeConfigs.GetSameKind(PetUnique, PetKind)
 	end
 end
 
+function AdoptMeConfigs.IsEggNotThere(EggUnique)
+	local IsEggThere = false
+	local Success, Err = pcall(function()
+		for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
+			task.wait()
+			if i == EggUnique then
+				IsEggThere = true
+				break
+			else
+				IsEggThere = false
+			end
+		end
+	end)
+
+	if not Success then
+		warn("Something went wrong while checking if egg is still there: " .. Err)
+		return false
+	else
+		if IsEggThere then
+			return false
+		else
+			return true
+		end
+	end
+end
+
 function AdoptMeConfigs.GetRandomKind(PetUnique)
 	for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
 		if i == PetUnique then
