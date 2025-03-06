@@ -13,6 +13,65 @@ function AdoptMeConfigs.getLastSegment(path)
 	return string.match(path, ".*/(.*)")
 end
 
+function AdoptMeConfigs.isOnlyLetters(text)
+	return text:match("^[A-Za-z]+$") ~= nil
+end
+
+function AdoptMeConfigs.GetNumberBeforeEqual(text)
+	return string.match(text, "^(%d+)")
+end
+
+function AdoptMeConfigs.GetIdInBracket(id)
+	return string.match(id, "%((.-)%)")
+end
+
+function AdoptMeConfigs.isTableEmpty(t)
+	return next(t) == nil
+end
+
+function AdoptMeConfigs.GetFirstSixLetters(text)
+	return string.sub(text, 1, 6)
+end
+
+function AdoptMeConfigs.extractName(name)
+	local exclamationIndex = string.find(name, "!")
+	local doubleColonIndex = string.find(name, "::")
+	if exclamationIndex then
+		return string.sub(name, 1, exclamationIndex - 1)
+	elseif doubleColonIndex then
+		return string.sub(name, 1, doubleColonIndex - 1)
+	else
+		return name
+	end
+end
+
+function AdoptMeConfigs.NaturalSort(str1, str2)
+	local function padNum(num) return ("%09d"):format(tonumber(num) or 0) end
+	str1 = str1:gsub("(%d+)", padNum)
+	str2 = str2:gsub("(%d+)", padNum)
+	return str1 < str2
+end
+
+function AdoptMeConfigs.GetPlayerInterior()
+	if workspace:FindFirstChild("HouseInteriors").furniture:FindFirstChildWhichIsA("Folder") then
+		if string.find(workspace:FindFirstChild("HouseInteriors").furniture:FindFirstChildWhichIsA("Folder").Name, LocalPlayer.Name) or string.find(workspace:FindFirstChild("HouseInteriors").blueprint:FindFirstChildWhichIsA("Model").Name, LocalPlayer.Name) then
+			return "House"
+		else
+			if workspace.Interiors:FindFirstChildWhichIsA("Model") then
+				return AdoptMeConfigs.extractName(workspace.Interiors:FindFirstChildWhichIsA("Model").Name)
+			else
+				return nil
+			end
+		end
+	else
+		if workspace.Interiors:FindFirstChildWhichIsA("Model") then
+			return AdoptMeConfigs.extractName(workspace.Interiors:FindFirstChildWhichIsA("Model").Name)
+		else
+			return nil
+		end
+	end
+end
+
 function AdoptMeConfigs.GetPlayersInventory()
 	return ClientData.get_data()[LocalPlayer.Name].inventory
 end
@@ -230,24 +289,24 @@ function AdoptMeConfigs.GetAilments(PetUnique1, PetUnique2, BabyUnique, Disabled
 	return Ailments
 end
 
-function AdoptMeConfigs.EquipPet(PetUnique)
+function AdoptMeConfigs.EquipPet(PetUnique, AsLast)
 	local args = {
 		[1] = PetUnique,
 		[2] = {
-			["equip_as_last"] = false,
-			["use_sound_delay"] = true
+			["equip_as_last"] = AsLast or false,
+			["use_sound_delay"] = false
 		}
 	}
 	AdoptMeConfigs.RunRouterClient(false, "ToolAPI/Equip", args)
 	print(PetUnique .. " Equipped")
 end
 
-function AdoptMeConfigs.UnequipPet(PetUnique)
+function AdoptMeConfigs.UnequipPet(PetUnique, AsLast)
 	local args = {
 		[1] = PetUnique,
 		[2] = {
-			["equip_as_last"] = false,
-			["use_sound_delay"] = true
+			["equip_as_last"] = AsLast or false,
+			["use_sound_delay"] = false
 		}
 	}
 	AdoptMeConfigs.RunRouterClient(false, "ToolAPI/Unequip", args)
