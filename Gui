@@ -8,6 +8,7 @@ local setiden = setthreadidentity or setidentity
 
 ClientData = require(game:GetService("ReplicatedStorage").ClientModules.Core.ClientData)
 RouterClient = require(game:GetService("ReplicatedStorage").ClientModules.Core.RouterClient.RouterClient)
+InteriorsM = require(game:GetService("ReplicatedStorage").ClientModules.Core.InteriorsM.InteriorsM)
 
 function AdoptMeConfigs.getLastSegment(path)
 	return string.match(path, ".*/(.*)")
@@ -86,6 +87,10 @@ end
 
 function AdoptMeConfigs.GetAilmentsManager()
 	return ClientData.get_server(LocalPlayer,"ailments_manager")
+end
+
+function AdoptMeConfigs.GetCurrentInterior()
+	return InteriorsM.get_current_location().destination_id
 end
 
 function AdoptMeConfigs.GetPetPetEntityManager()
