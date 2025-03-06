@@ -76,6 +76,14 @@ function AdoptMeConfigs.GetPlayersInventory()
 	return ClientData.get_data()[LocalPlayer.Name].inventory
 end
 
+function AdoptMeConfigs.GetPlayerMoney()
+	return ClientData.get_data()[game.Players.LocalPlayer.Name].money
+end
+
+function AdoptMeConfigs.GetHouseInterior()
+	return ClientData.get_server(game.Players.LocalPlayer,"house_interior").player
+end
+
 function AdoptMeConfigs.GetAilmentsManager()
 	return ClientData.get_server(LocalPlayer,"ailments_manager")
 end
@@ -176,6 +184,21 @@ function AdoptMeConfigs.RunRouterClient(IsFire, RouterName, args)
 	setiden(old)
 end
 
+function AdoptMeConfigs.GetPlayerPotionAmount()
+	local NewPlayerMoney = AdoptMeConfigs.GetPlayerMoney()
+	local PlayerInv = AdoptMeConfigs.GetPlayersInventory()
+	local PlayerInventoryFood = PlayerInv.food
+	local NewPlayerAgePotion = 0
+
+	for i,v in pairs(PlayerInventoryFood) do
+		if v.kind == "pet_age_potion" then
+			NewPlayerAgePotion = NewPlayerAgePotion + 1
+		end
+	end
+
+	return NewPlayerAgePotion or 0
+end
+
 function AdoptMeConfigs.SetPlayerToParent()
 	local args = {
 		[1] = "Parents",
@@ -199,10 +222,26 @@ function AdoptMeConfigs.SetPlayerToBaby()
 	AdoptMeConfigs.RunRouterClient(false, "TeamAPI/ChooseTeam", args)
 end
 
+function AdoptMeConfigs.GetFoodToGive(foodidGave)
+	local Inventory = AdoptMeConfigs.GetPlayersInventory()
+	local food = Inventory.food
+
+	local foodid = ""
+
+	for id,food in pairs(food) do
+		if food.id == foodidGave then
+			foodid = id
+			break
+		end
+	end
+
+	return foodid
+end
+
 function AdoptMeConfigs.GetPlayersPetConfigs(PetUnique)
 	local PetConfigs = {
 		petKind = "",
-		petAge = ""
+		petAge = 1
 	}
 	
 	for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
