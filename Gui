@@ -189,7 +189,7 @@ function AdoptMeConfigs.GetCurrentPet(PetUnique)
 	return CurrentPet
 end
 
-function AdoptMeConfigs.GetAilments(PetUnique1, PetUnique2, DisabledAilments)
+function AdoptMeConfigs.GetAilments(PetUnique1, PetUnique2, BabyUnique, DisabledAilments)
 	local Ailments = {
 		["FirstPet"] = {},
 		["SecondPet"] = {},
@@ -200,7 +200,13 @@ function AdoptMeConfigs.GetAilments(PetUnique1, PetUnique2, DisabledAilments)
 	local PetAilments = AilmentsManager.ailments
 	local BabyAilments = AilmentsManager.baby_ailments
 	
-	Ailments.Baby = BabyAilments or {}
+	if BabyUnique then
+		for i,v in pairs(BabyAilments) do
+			if DisabledAilments and not table.find(DisabledAilments, v.kind) then
+				Ailments.Baby[v.kind] = {}
+			end
+		end
+	end
 	
 	for i,v in pairs(PetAilments) do
 		if not PetUnique1 and not PetUnique2 then
@@ -308,13 +314,13 @@ function AdoptMeConfigs.GetSameKind(PetUnique1, PetUnique2, PetKind)
 	end
 end
 
-function AdoptMeConfigs.GetRandomKind(PetUnique1, PetUnique2)
+function AdoptMeConfigs.GetRandomKind(PetUniqueToSearch, PetUniqueToSkip)
 	for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
-		if i == PetUnique1 or i == PetUnique2 then
+		if i == PetUniqueToSearch or i == PetUniqueToSkip then
 			continue
 		end
 		
-		local PetConfigs = AdoptMeConfigs.GetPetConfigs(AdoptMeConfigs.GetPlayersPetConfigs(PetUnique).petKind)
+		local PetConfigs = AdoptMeConfigs.GetPetConfigs(AdoptMeConfigs.GetPlayersPetConfigs(PetUniqueToSearch).petKind)
 		local PetToSearch = AdoptMeConfigs.GetPetConfigs(v.kind)
 		
 		if PetConfigs.isEgg and PetToSearch.isEgg then
