@@ -434,6 +434,7 @@ function AdoptMeConfigs.GetSameAgeKind(PetUnique1, PetKind)
 end
 
 function AdoptMeConfigs.GetRandomKind(PetUniqueToSearch, PetUniqueToSkip)
+	print(PetUniqueToSearch, PetUniqueToSkip)
 	for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
 		if i == PetUniqueToSearch or i == PetUniqueToSkip then
 			continue
