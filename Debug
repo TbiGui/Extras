@@ -433,14 +433,14 @@ function AdoptMeConfigs.GetSameAgeKind(PetUnique1, PetKind)
 	end
 end
 
-function AdoptMeConfigs.GetRandomKind(PetUniqueToSearch, PetUniqueToSkip)
+function AdoptMeConfigs.GetRandomKind(PetUniqueToSearch, PetUniqueToSkip, PetKindToSearch)
 	print(PetUniqueToSearch, PetUniqueToSkip)
 	for i,v in pairs(AdoptMeConfigs.GetPlayersInventory().pets) do
 		if i == PetUniqueToSearch or i == PetUniqueToSkip then
 			continue
 		end
 		
-		local PetConfigs = AdoptMeConfigs.GetPetConfigs(AdoptMeConfigs.GetPlayersPetConfigs(PetUniqueToSearch).petKind)
+		local PetConfigs = AdoptMeConfigs.GetPetConfigs(PetKindToSearch)
 		local PetToSearch = AdoptMeConfigs.GetPetConfigs(v.kind)
 		
 		if PetConfigs.isEgg and PetToSearch.isEgg then
