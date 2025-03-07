@@ -439,15 +439,15 @@ function AdoptMeConfigs.GetRandomKind(PetUniqueToSearch, PetUniqueToSkip, PetKin
 		if i == PetUniqueToSearch or i == PetUniqueToSkip then
 			continue
 		end
-		
+		print(v.kind .. " is the kind", v.id .. " is the id")
 		local PetConfigs = AdoptMeConfigs.GetPetConfigs(PetKindToSearch)
 		local PetToSearch = AdoptMeConfigs.GetPetConfigs(v.kind)
 		
 		if PetConfigs.isEgg and PetToSearch.isEgg then
-			print("Egg", PetConfigs.isEgg, PetToSearch.isEgg, AdoptMeConfigs.GetPlayersPetConfigs(PetUniqueToSearch).petKind, v.kind)
+			print("Egg", PetConfigs.isEgg, PetToSearch.isEgg, PetKindToSearch, v.kind)
 			return i
 		elseif not PetConfigs.isEgg and not PetToSearch.isEgg then
-			print("Pet", PetConfigs.isEgg, PetToSearch.isEgg, AdoptMeConfigs.GetPlayersPetConfigs(PetUniqueToSearch).petKind, v.kind)
+			print("Pet", PetConfigs.isEgg, PetToSearch.isEgg, PetKindToSearch, v.kind)
 			return i
 		end
 	end
